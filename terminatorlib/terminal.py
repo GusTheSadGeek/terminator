@@ -1460,6 +1460,12 @@ class Terminal(Gtk.VBox):
                 details[1]))
             command = 'telnet %s %s' % (details[0], details[1])
 
+        # GUS
+        if os.path.isfile("/tmp/terminator_rc_file"):
+            command = '/bin/bash --rcfile /tmp/terminator_rc_file'.split(' ')
+        dbg(command)
+        # GUS
+
         # working directory set in layout config
         if self.directory:
             self.set_cwd(self.directory)
@@ -1511,6 +1517,14 @@ class Terminal(Gtk.VBox):
                                                 None,
                                                 None)
         self.command = shell
+
+        # try:
+        #     with open('/tmp/terminator_term_title') as f:
+        #         lines=f.readlines()
+        #     self.titlebar.set_custom_string(lines[0].strip())
+        #         # Do something with the file
+        # except IOError:
+        #     pass
 
         self.titlebar.update()
 
@@ -1982,6 +1996,22 @@ class Terminal(Gtk.VBox):
                 window.title.force_title(None)
         dialog.destroy()
         return
+
+
+    # GUS
+    def set_tab_title(self, title):
+        window = self.get_toplevel()
+        if not window.is_child_notebook():
+            return False
+
+        notebook = window.get_children()[0]
+        n_page = notebook.get_current_page()
+        page = notebook.get_nth_page(n_page)
+        label = notebook.get_tab_label(page)
+        label.set_label(title)
+        return True
+    # GUS
+
 
     def key_edit_tab_title(self):
         window = self.get_toplevel()

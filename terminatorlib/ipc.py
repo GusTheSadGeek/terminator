@@ -168,7 +168,13 @@ class DBusService(Borg, dbus.service.Object):
         sibling = maker.make('Terminal')
         sibling.set_cwd(cwd)
         if title: sibling.titlebar.set_custom_string(title)
-        sibling.spawn_child(init_command=cmd)
+        # GUS
+        if len(cmd) > 0:
+            cmd = ''.join([str(v) for v in cmd])
+            sibling.spawn_child(init_command=str(cmd).split('#'))
+        else:
+            sibling.spawn_child()
+        # GUS
 
         # split and run command in new terminal
         container.split_axis(terminal, split_vert, cwd, sibling)
@@ -264,6 +270,14 @@ class DBusService(Borg, dbus.service.Object):
                     terms = enumerate_descendants(tab_child)[1]
                 if terminal in terms:
                     return root_widget.get_tab_label(tab_child).get_label()
+    # GUS
+    @dbus.service.method(BUS_NAME)
+    def set_term_title(self, uuid=None, options=None):
+        """Set the title of a parent tab of a given terminal"""
+        maker = Factory()
+        terminal = self.terminator.find_terminal_by_uuid(uuid)
+        terminal.titlebar.label.set_text(options["title"], True)
+    # GUS
 
     @dbus.service.method(BUS_NAME)
     def set_tab_title(self, uuid=None, options=dbus.Dictionary()):
@@ -345,10 +359,53 @@ def vsplit_cmd(session, uuid, title, cmd, options):
     """Call the dbus method to vertically split a terminal and run the specified command in the new terminal"""
     session.vsplit_cmd(uuid, title, cmd)
 
+#GUS
+@with_proxy
+def vsplit_cmd_gus(session, uuid, options):
+    # Pull out the title
+    if 'title' in options:
+        title = options['title']
+        del options['title']
+    else:
+        title=None
+
+    # Pull out the xcmd
+    if 'cmd' in options:
+        cmd = options['cmd']
+        del options['cmd']
+    else:
+        cmd = ""
+    """Call the dbus method to vertically split a terminal and run the specified command in the new terminal"""
+    print(session.vsplit_cmd(uuid, title, cmd))
+#GUS
+
+
 @with_proxy
 def hsplit_cmd(session, uuid, title, cmd, options):
     """Call the dbus method to horizontally split a terminal and run the specified command in the new terminal"""
     session.hsplit_cmd(uuid, title, cmd)
+
+#GUS
+@with_proxy
+def hsplit_cmd_gus(session, uuid, options):
+    # Pull out the title
+    if 'title' in options:
+        title = options['title']
+        del options['title']
+    else:
+        title=None
+
+    # Pull out the xcmd
+    if 'cmd' in options:
+        cmd = options['cmd']
+        del options['cmd']
+    else:
+        cmd=""
+
+    """Call the dbus method to horizontally split a terminal and run the specified command in the new terminal"""
+    print(session.hsplit_cmd(uuid, title, cmd))
+#GUS
+
 
 @with_proxy
 def get_terminals(session, options):
@@ -389,4 +446,11 @@ def set_tab_title(session, uuid, options):
 def switch_profile(session, uuid, options):
     """Call the dbus method to return the title of a tab"""
     session.switch_profile(uuid, options)
+
+#GUS
+@with_proxy
+def set_tab_title(session, uuid, options):
+    """Call the dbus method to return the title of a tab"""
+    session.set_tab_title(uuid, options)
+#GUS
 

@@ -40,14 +40,17 @@ COMMANDS={
     'new_tab':              [True,  _('Open a new tab')],
     'hsplit':               [True,  _('Split the current terminal horizontally')],
     'vsplit':               [True,  _('Split the current terminal vertically')],
+    'hsplit_cmd_gus':               [True,  _('Split the current terminal horizontally')],
+    'vsplit_cmd_gus':               [True,  _('Split the current terminal vertically')],
     'get_terminals':        [False, _('Get a list of all terminals')],
     'get_focused_terminal': [False, _('Get the uuid of the current focused terminal')],
     'get_window':           [True,  _('Get the UUID of a parent window')],
     'get_window_title':     [True,  _('Get the title of a parent window')],
     'get_tab':              [True,  _('Get the UUID of a parent tab')],
     'get_tab_title':        [True,  _('Get the title of a parent tab')],
-    'set_tab_title':        [True,  _('Set the title of a parent tab')],
-    'switch_profile':       [True,  _('Switch current terminal profile')],
+    'switch_profile':      [True,  _('Switch current terminal profile')],
+    'set_term_title':      [True,  _('Set the title of terminal')],
+    'set_tab_title':      [True,  _('Set the title of tab')],
     }
 
 if __name__ == '__main__':
@@ -76,8 +79,11 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--profile', dest='profile', type=str, default=argparse.SUPPRESS,
                 help=_('Terminal UUID for when not in env var TERMINATOR_UUID'))
 
-    parser.add_argument('-t', '--tab-title', dest='tab-title', type=str, default="Missing Tab Title! Use -t argument!",
-                help=_('Tab name to set. Only used with "set_tab_title" command.'))
+    parser.add_argument('-t', '--title', dest='title', type=str, default=argparse.SUPPRESS,
+                help=_('title text for terminal or window'))
+
+    parser.add_argument('-c', '--command',  nargs='+', dest='cmd', type=str, default=argparse.SUPPRESS,
+                help=_('command new terminal'))
 
     parser.add_argument('-v', '--version', action='version', version='%%(prog)s %s' %(APP_VERSION))
 
@@ -87,15 +93,29 @@ if __name__ == '__main__':
     command = options['command'][0]
     del options['command']
 
+    # # Pull out the title
+    # if 'title' in options:
+    #     title = options['title'][0]
+    #     del options['title']
+    #
+    # # Pull out the xcmd
+    # if 'cmd' in options:
+    #     command = options['cmd'][0]
+    #     del options['cmd']
+
     func = getattr(ipc, command)
     uuid_required = COMMANDS[command][0]
 
     if uuid_required:
         uuid = options.get('uuid', os.environ.get('TERMINATOR_UUID'))
         if uuid:
-            print(str(func(uuid, options)))
+            a = func(uuid, options)
+            if a:
+                print(str(a))
         else:
             err("$TERMINATOR_UUID is not set, or passed as an option.")
             sys.exit(1)
     else:
-        print(str(func(options)))
+        a = func(options)
+        if a:
+            print(str(a))
