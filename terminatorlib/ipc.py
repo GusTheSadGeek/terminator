@@ -454,3 +454,9 @@ def set_tab_title(session, uuid, options):
     session.set_tab_title(uuid, options)
 #GUS
 
+#GUS
+@with_proxy
+def set_term_title(session, uuid, options):
+    """Call the dbus method to return the title of a tab"""
+    session.set_term_title(uuid, options)
+#GUS
