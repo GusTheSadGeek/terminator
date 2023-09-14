@@ -279,6 +279,24 @@ class DBusService(Borg, dbus.service.Object):
         terminal.titlebar.label.set_text(options["title"], True)
     # GUS
 
+    # GUS
+    @dbus.service.method(BUS_NAME)
+    def set_zoom(self, uuid=None, options=None):
+         """Set the title of a parent tab of a given terminal"""
+         #  maker = Factory()
+         z = options["zoom"]
+         z = int(z)
+         terminal = self.terminator.find_terminal_by_uuid(uuid)
+         terminal.zoom_orig()
+         if z < 0:
+             for _ in range(-z):
+                 terminal.key_zoom_out()
+         else:
+             for _ in range(z):
+                 terminal.key_zoom_in()
+         #pass
+    # GUS
+
     @dbus.service.method(BUS_NAME)
     def set_tab_title(self, uuid=None, options=dbus.Dictionary()):
         """Set the title of a parent tab of a given terminal"""
@@ -295,7 +313,8 @@ class DBusService(Borg, dbus.service.Object):
         n_page = notebook.get_current_page()
         page = notebook.get_nth_page(n_page)
         label = notebook.get_tab_label(page)
-        label.set_custom_label(tab_title, force=True)
+        if not label:
+            label.set_custom_label(tab_title, force=True)
 
     @dbus.service.method(BUS_NAME)
     def switch_profile(self, uuid=None, options=dbus.Dictionary()):
@@ -459,4 +478,11 @@ def set_tab_title(session, uuid, options):
 def set_term_title(session, uuid, options):
     """Call the dbus method to return the title of a tab"""
     session.set_term_title(uuid, options)
+#GUS
+
+#GUS
+@with_proxy
+def set_zoom(session, uuid, options):
+    """Call the dbus method to return the title of a tab"""
+    session.set_zoom( uuid, options)
 #GUS

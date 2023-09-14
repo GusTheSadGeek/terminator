@@ -51,6 +51,7 @@ COMMANDS={
     'switch_profile':      [True,  _('Switch current terminal profile')],
     'set_term_title':      [True,  _('Set the title of terminal')],
     'set_tab_title':      [True,  _('Set the title of tab')],
+    'set_zoom':           [True,  _('Set the zoom of current terminal')],
     }
 
 if __name__ == '__main__':
@@ -86,6 +87,8 @@ if __name__ == '__main__':
                 help=_('command new terminal'))
 
     parser.add_argument('-v', '--version', action='version', version='%%(prog)s %s' %(APP_VERSION))
+
+    parser.add_argument('-z', '--zoom', dest='zoom', type=str, default=argparse.SUPPRESS, help=_('zoom factor'))
 
     options = vars(parser.parse_args())     # Straight to dict
 
